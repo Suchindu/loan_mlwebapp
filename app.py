@@ -56,100 +56,100 @@ def input_transformer(inputs):
 
     return transformed_inputs
 
-# Initialize session state
-if 'step' not in st.session_state:
-    st.session_state.step = 1
+if 'page' not in st.session_state:
+    st.session_state.page = 'form'
 
-# Function to go to the next step
-def next_step():
-    st.session_state.step += 1
+if st.session_state.page == 'form':
+    mainContainer = st.container()
 
-# Function to go to the previous step
-def prev_step():
-    st.session_state.step -= 1
+    with mainContainer:
+        tab = st.table()
 
-# Step 1: Input form
-if st.session_state.step == 1:
-    st.write("Step 1: Input Form")
-    fName = st.text_input("Client full name: ")
-    active_loan = st.selectbox("Already has an active loan?", ("-", "Yes", "No"))
-    education = st.selectbox("Enter client education:", ("-", 'Secondary', 'Graduation'))
-    employed_days = st.slider("Enter number of employed years before application:", min_value=0, max_value=80)
-    income = st.text_input("Enter client income:", value=0)
-    income_type = st.selectbox("Enter income type:", ("-", 'Commercial', 'Retired', 'Service', 'Student', 'Unemployed'))
-    loan_contract_type = st.selectbox("Enter loan contract type:", ("-", 'Cash Loan', 'Revolving Loan'))
-    loan_amount = st.text_input("Enter loan amount requested:", value=0)
-    loan_annuity = st.text_input("Enter loan annuity amount:", value=0)
-    age = st.slider("Enter age:", min_value=20, max_value=60)
-    gender = st.selectbox("Enter client gender:", ("-", "Female", "Male"))
-    child_count = st.selectbox("Enter child count:", (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
-    registration = st.slider("Years since registration:", min_value=0, max_value=50)
-    marital_status = st.selectbox("Enter marital status:", ("-", "Divorced", "Single", "Married", "Widow"))
-    car_owned = st.selectbox("Car owner?", ("-", "Yes", "No"))
-    bike_owned = st.selectbox("Bike owner?", ("-", "Yes", "No"))
-    house_owned = st.selectbox("House owner?", ("-", "Yes", "No"))
+        tab1 = tab.form(key='my_form')
+        tab1.header("Enter Following Details to predict Loan Default status")
 
-    if st.button('Next'):
-        st.session_state.inputs = {
-            "Loan Amount": loan_amount,
-            "Income": income,
-            "Loan Annuity": loan_annuity,
-            "Age": age,
-            "Child Count": child_count,
-            "Employed Days": employed_days,
-            "Years since registration": registration
-        }
-        st.session_state.inputs_to_transform = {
-            "House Owned": house_owned,
-            "Car Owned": car_owned,
-            "Bike Owned": bike_owned,
-            "Has Active Loan": active_loan,
-            "Client Income Type": income_type,
-            "Client Education": education,
-            "Client Marital Status": marital_status,
-            "Client Gender": gender,
-            "Loan Contract Type": loan_contract_type
-        }
-        st.session_state.fName = fName
-        next_step()
+        col1 , col2 = tab1.columns(2)
 
-# Step 2: Validation and Prediction
-elif st.session_state.step == 2:
-    st.write("Step 2: Validation and Prediction")
+        fName = col1.text_input("Client full name: ")
+
+        active_loan = col1.selectbox("Already has an active loan?" , ("-", "Yes" , "No"))
+        education = col1.selectbox("Enter client education: " , ("-", 'Secondary', 'Graduation') , on_change=None)
+        employed_days = col1.slider("Enter number of employed years before application: " , min_value = 0 , max_value= 80 , on_change=None)
+
+        income = col1.text_input("Enter client income: "  , value = 0 ,on_change=None)
+        income_type = col2.selectbox("Enter income type: " , ("-", 'Commercial','Retired' ,'Service', 'Student' , 'Unemployed') , on_change=None)
+        loan_contract_type = col2.selectbox("Enter loan contract type: " , ("-", 'Cash Loan', 'Revolving Loan') , on_change=None)
+
+        loan_amount = col1.text_input("Enter loan amount requested: " , value = 0 , on_change=None)
+        loan_annuity = col2.text_input("Enter loan annuity amount: " , value = 0 , on_change=None)
+
+        age = col1.slider("Enter age: " , min_value = 20 , max_value= 60 , on_change=None)
+
+        gender = col1.selectbox("Enter client gender: " , ("-", "Female", "Male" ) , on_change=None)
+        child_count = col2.selectbox("Enter child count: " , (0,1,2,3,4,5,6,7,8,9,10) , on_change=None)
+        registration = col2.slider("Years since registration: " , min_value = 0 , max_value= 50 , on_change=None)
+
+        marital_status = col1.selectbox("Enter marital status" , ("-", "Divorced", "Single", "Married", "Widow"))
+        car_owned = col1.selectbox("Car owner?" , ("-", "Yes" , "No"))
+        bike_owned = col1.selectbox("Bike owner?" , ("-", "Yes" , "No"))
+        house_owned = col1.selectbox("House owner?" , ("-", "Yes" , "No"))
+
+        Submit = tab1.form_submit_button("Submit")
+        if Submit:
+            inputs = { "Loan Amount":loan_amount , "Income": income , "Loan Annuity":loan_annuity , "Age": age, "Child Count": child_count, "Employed Days": employed_days, "Years since registration": registration }
+            inputs_to_transform = {
+                                   "House Owned": house_owned,
+                                   "Car Owned": car_owned,
+                                   "Bike Owned": bike_owned,
+                                   "Has Active Loan": active_loan,
+                                   "Client Income Type": income_type,
+                                   "Client Education": education,
+                                   "Client Marital Status": marital_status,
+                                   "Client Gender": gender,
+                                   "Loan Contract Type": loan_contract_type
+            }
+
+            invalid_inputs = []
+
+            if fName.strip() == "":
+                invalid_inputs.append("Client Name")
+
+            if loan_amount.strip() == "0" or loan_amount.strip() == "":
+                invalid_inputs.append("Loan Amount")
+
+            for label, value in inputs.items():
+                if value == '-' or value == "-" or value == None:
+                    invalid_inputs.append(label)
+
+            for label, value in inputs_to_transform.items():
+                if value == '-' or value == "-" or value == None:
+                    invalid_inputs.append(label)
+
+            if len(invalid_inputs) > 0:
+                invalid_inputs_str = "Following fields are invalid: \n"
+                st.error(invalid_inputs_str + ", ".join(invalid_inputs))
+            else:
+                st.session_state.inputs = inputs
+                st.session_state.inputs_to_transform = inputs_to_transform
+                st.session_state.fName = fName
+                st.session_state.page = 'result'
+                st.experimental_rerun()
+
+elif st.session_state.page == 'result':
     inputs = st.session_state.inputs
     inputs_to_transform = st.session_state.inputs_to_transform
     fName = st.session_state.fName
-    invalid_inputs = []
 
-    if fName.strip() == "":
-        invalid_inputs.append("Client Name")
-
-    if inputs["Loan Amount"].strip() == "0" or inputs["Loan Amount"].strip() == "":
-        invalid_inputs.append("Loan Amount")
-
-    for label, value in inputs.items():
-        if value == '-' or value == "-" or value is None:
-            invalid_inputs.append(label)
-
-    for label, value in inputs_to_transform.items():
-        if value == '-' or value == "-" or value is None:
-            invalid_inputs.append(label)
-
-    if len(invalid_inputs) > 0:
-        invalid_inputs_str = "Following fields are invalid: \n"
-        st.error(invalid_inputs_str + ", ".join(invalid_inputs))
+    transformed_inputs = input_transformer(inputs_to_transform)
+    inputs_array = [list(inputs.values()) + transformed_inputs]
+    st.write("Client Name: " + fName)
+    st.write("Loan Amount: " + inputs["Loan Amount"])
+    prediction  = model.predict(inputs_array)
+    if prediction[0] == 0:
+        st.success("Please accept the above loan request")
     else:
-        transformed_inputs = input_transformer(inputs_to_transform)
-        inputs_array = [list(inputs.values()) + transformed_inputs]
-        st.write("Client Name: " + fName)
-        st.write("Loan Amount: " + inputs["Loan Amount"])
-        prediction = model.predict(inputs_array)
-        if prediction[0] == 0:
-            st.success("Please accept the above loan request")
-        else:
-            st.error("Please reject the above request as client is more prone to default on the loan")
+        st.error("Please reject the above request as client is more prone to default on the loan")
 
-    if st.button('Back'):
-        prev_step()
-    if st.button('Submit'):
-        st.write("Form submitted successfully!")
+    if st.button("Back"):
+        st.session_state.page = 'form'
+        st.experimental_rerun()
