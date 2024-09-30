@@ -56,13 +56,14 @@ def input_transformer(inputs):
 
     return transformed_inputs
 
-if 'page' not in st.session_state:
-    st.session_state.page = 'form'
+# Initialize session state
+if 'submitted' not in st.session_state:
+    st.session_state.submitted = False
 
-if st.session_state.page == 'form':
-    mainContainer = st.container()
+mainContainer = st.container()
 
-    with mainContainer:
+with mainContainer:
+    if not st.session_state.submitted:
         tab = st.table()
 
         tab1 = tab.form(key='my_form')
@@ -132,24 +133,23 @@ if st.session_state.page == 'form':
                 st.session_state.inputs = inputs
                 st.session_state.inputs_to_transform = inputs_to_transform
                 st.session_state.fName = fName
-                st.session_state.page = 'result'
-                st.experimental_set_query_params(page='result')
-
-if st.session_state.page == 'result':
-    inputs = st.session_state.inputs
-    inputs_to_transform = st.session_state.inputs_to_transform
-    fName = st.session_state.fName
-
-    transformed_inputs = input_transformer(inputs_to_transform)
-    inputs_array = [list(inputs.values()) + transformed_inputs]
-    st.write("Client Name: " + fName)
-    st.write("Loan Amount: " + inputs["Loan Amount"])
-    prediction  = model.predict(inputs_array)
-    if prediction[0] == 0:
-        st.success("Please accept the above loan request")
+                st.session_state.submitted = True
+                st.experimental_rerun()
     else:
-        st.error("Please reject the above request as client is more prone to default on the loan")
+        inputs = st.session_state.inputs
+        inputs_to_transform = st.session_state.inputs_to_transform
+        fName = st.session_state.fName
 
-    if st.button("Back"):
-        st.session_state.page = 'form'
-        st.experimental_set_query_params(page='form')
+        transformed_inputs = input_transformer(inputs_to_transform)
+        inputs_array = [list(inputs.values()) + transformed_inputs]
+        st.write("Client Name: " + fName)
+        st.write("Loan Amount: " + inputs["Loan Amount"])
+        prediction  = model.predict(inputs_array)
+        if prediction[0] == 0:
+            st.success("Please accept the above loan request")
+        else:
+            st.error("Please reject the above request as client is more prone to default on the loan")
+
+        if st.button("Go Back"):
+            st.session_state.submitted = False
+            st.experimental_rerun()
