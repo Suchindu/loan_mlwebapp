@@ -133,6 +133,7 @@ if st.session_state.page == 'form':
                 st.session_state.inputs_to_transform = inputs_to_transform
                 st.session_state.fName = fName
                 st.session_state.page = 'result'
+                st.experimental_set_query_params(page='result')
                 st.experimental_rerun()
 
 elif st.session_state.page == 'result':
@@ -152,4 +153,5 @@ elif st.session_state.page == 'result':
 
     if st.button("Back"):
         st.session_state.page = 'form'
+        st.experimental_set_query_params(page='form')
         st.experimental_rerun()
