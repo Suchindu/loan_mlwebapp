@@ -1,8 +1,16 @@
 import pickle
 import streamlit as st
 
+
+
 # loading the saved models
+
 model = pickle.load(open('SVMmodel.sav', 'rb'))
+
+# Load and display the image
+image = Image.open("LoanDrive.jpg")
+st.set_page_config(page_title="LoanDrive - Loan Default Predictor", page_icon=image, layout="wide")
+
 
 def input_transformer(inputs):
     value_map = {
@@ -55,101 +63,93 @@ def input_transformer(inputs):
         transformed_inputs.append(value_map[input][value])
 
     return transformed_inputs
+# Page Header
+st.markdown('<div class="header">Welcome to LoanDrive - Loan Default Prediction</div>', unsafe_allow_html=True)
 
-# Initialize session state
-if 'submitted' not in st.session_state:
-    st.session_state.submitted = False
+# Display and center the image
+st.image(image, caption="LoanDrive", use_column_width=False)
 
 mainContainer = st.container()
 
 with mainContainer:
-    if not st.session_state.submitted:
-        tab = st.table()
+    st.markdown('<div class="form-title">Enter the Following Details to Predict Loan Default Status</div>', unsafe_allow_html=True)
+    tab = st.table()
 
-        tab1 = tab.form(key='my_form')
-        tab1.header("Enter Following Details to predict Loan Default status")
+    tab1 = tab.form(key='my_form')
+    tab1.header("Enter Following Details to predict Loan Default status")
 
-        col1 , col2 = tab1.columns(2)
+    col1 , col2 = tab1.columns(2)
 
-        fName = col1.text_input("Client full name: ")
+    fName = col1.text_input("Client full name: ")
 
-        active_loan = col1.selectbox("Already has an active loan?" , ("-", "Yes" , "No"))
-        education = col1.selectbox("Enter client education: " , ("-", 'Secondary', 'Graduation') , on_change=None)
-        employed_days = col1.slider("Enter number of employed years before application: " , min_value = 0 , max_value= 80 , on_change=None)
+    active_loan = col1.selectbox("Already has an active loan?" , ("-", "Yes" , "No"))
+    education = col1.selectbox("Enter client education: " , ("-", 'Secondary', 'Graduation') , on_change=None)
+    employed_days = col1.slider("Enter number of employed years before application: " , min_value = 0 , max_value= 80 , on_change=None)
 
-        income = col1.text_input("Enter client income: "  , value = 0 ,on_change=None)
-        income_type = col2.selectbox("Enter income type: " , ("-", 'Commercial','Retired' ,'Service', 'Student' , 'Unemployed') , on_change=None)
-        loan_contract_type = col2.selectbox("Enter loan contract type: " , ("-", 'Cash Loan', 'Revolving Loan') , on_change=None)
+    income = col1.text_input("Enter client income: "  , value = 0 ,on_change=None)
+    income_type = col2.selectbox("Enter income type: " , ("-", 'Commercial','Retired' ,'Service', 'Student' , 'Unemployed') , on_change=None)
+    loan_contract_type = col2.selectbox("Enter loan contract type: " , ("-", 'Cash Loan', 'Revolving Loan') , on_change=None)
 
-        loan_amount = col1.text_input("Enter loan amount requested: " , value = 0 , on_change=None)
-        loan_annuity = col2.text_input("Enter loan annuity amount: " , value = 0 , on_change=None)
+    loan_amount = col1.text_input("Enter loan amount requested: " , value = 0 , on_change=None)
+    loan_annuity = col2.text_input("Enter loan annuity amount: " , value = 0 , on_change=None)
 
-        age = col1.slider("Enter age: " , min_value = 20 , max_value= 60 , on_change=None)
+    age = col1.slider("Enter age: " , min_value = 20 , max_value= 60 , on_change=None)
 
-        gender = col1.selectbox("Enter client gender: " , ("-", "Female", "Male" ) , on_change=None)
-        child_count = col2.selectbox("Enter child count: " , (0,1,2,3,4,5,6,7,8,9,10) , on_change=None)
-        registration = col2.slider("Years since registration: " , min_value = 0 , max_value= 50 , on_change=None)
+    gender = col1.selectbox("Enter client gender: " , ("-", "Female", "Male" ) , on_change=None)
+    child_count = col2.selectbox("Enter child count: " , (0,1,2,3,4,5,6,7,8,9,10) , on_change=None)
+    registration = col2.slider("Years since registration: " , min_value = 0 , max_value= 50 , on_change=None)
 
-        marital_status = col1.selectbox("Enter marital status" , ("-", "Divorced", "Single", "Married", "Widow"))
-        car_owned = col1.selectbox("Car owner?" , ("-", "Yes" , "No"))
-        bike_owned = col1.selectbox("Bike owner?" , ("-", "Yes" , "No"))
-        house_owned = col1.selectbox("House owner?" , ("-", "Yes" , "No"))
+    marital_status = col1.selectbox("Enter marital status" , ("-", "Divorced", "Single", "Married", "Widow"))
+    car_owned = col1.selectbox("Car owner?" , ("-", "Yes" , "No"))
+    bike_owned = col1.selectbox("Bike owner?" , ("-", "Yes" , "No"))
+    house_owned = col1.selectbox("House owner?" , ("-", "Yes" , "No"))
 
-        Submit = tab1.form_submit_button("Submit")
-        if Submit:
-            inputs = { "Loan Amount":loan_amount , "Income": income , "Loan Annuity":loan_annuity , "Age": age, "Child Count": child_count, "Employed Days": employed_days, "Years since registration": registration }
-            inputs_to_transform = {
-                                   "House Owned": house_owned,
-                                   "Car Owned": car_owned,
-                                   "Bike Owned": bike_owned,
-                                   "Has Active Loan": active_loan,
-                                   "Client Income Type": income_type,
-                                   "Client Education": education,
-                                   "Client Marital Status": marital_status,
-                                   "Client Gender": gender,
-                                   "Loan Contract Type": loan_contract_type
-            }
 
-            invalid_inputs = []
+    Submit = tab1.form_submit_button("Submit")
+    if Submit:
+        inputs = { "Loan Amount":loan_amount , "Income": income , "Loan Annuity":loan_annuity , "Age": age, "Child Count": child_count, "Employed Days": employed_days, "Years since registration": registration }
+        inputs_to_transform = {
+                               "House Owned": house_owned,
+                               "Car Owned": car_owned,
+                               "Bike Owned": bike_owned,
+                               "Has Active Loan": active_loan,
+                               "Client Income Type": income_type,
+                               "Client Education": education,
+                               "Client Marital Status": marital_status,
+                               "Client Gender": gender,
+                               "Loan Contract Type": loan_contract_type
+        }
 
-            if fName.strip() == "":
-                invalid_inputs.append("Client Name")
 
-            if loan_amount.strip() == "0" or loan_amount.strip() == "":
-                invalid_inputs.append("Loan Amount")
+        invalid_inputs = []
 
-            for label, value in inputs.items():
-                if value == '-' or value == "-" or value == None:
-                    invalid_inputs.append(label)
+        if fName.strip() == "":
+            invalid_inputs.append("Client Name")
 
-            for label, value in inputs_to_transform.items():
-                if value == '-' or value == "-" or value == None:
-                    invalid_inputs.append(label)
+        if loan_amount.strip() == "0" or loan_amount.strip() == "":
+            invalid_inputs.append("Loan Amount")
 
-            if len(invalid_inputs) > 0:
-                invalid_inputs_str = "Following fields are invalid: \n"
-                st.error(invalid_inputs_str + ", ".join(invalid_inputs))
-            else:
-                st.session_state.inputs = inputs
-                st.session_state.inputs_to_transform = inputs_to_transform
-                st.session_state.fName = fName
-                st.session_state.submitted = True
-                st.experimental_rerun()
-    else:
-        inputs = st.session_state.inputs
-        inputs_to_transform = st.session_state.inputs_to_transform
-        fName = st.session_state.fName
+        for label, value in inputs.items():
+            if value == '-' or value == "-" or value == None:
+                invalid_inputs.append(label)
 
-        transformed_inputs = input_transformer(inputs_to_transform)
-        inputs_array = [list(inputs.values()) + transformed_inputs]
-        st.write("Client Name: " + fName)
-        st.write("Loan Amount: " + inputs["Loan Amount"])
-        prediction  = model.predict(inputs_array)
-        if prediction[0] == 0:
-            st.success("Please accept the above loan request")
+        for label, value in inputs_to_transform.items():
+            if value == '-' or value == "-" or value == None:
+                invalid_inputs.append(label)
+
+
+        if len(invalid_inputs) > 0:
+            invalid_inputs_str = "Following fields are invalid: \n"
+            st.error(invalid_inputs_str + ", ".join(invalid_inputs))
         else:
-            st.error("Please reject the above request as client is more prone to default on the loan")
-
-        if st.button("Go Back"):
-            st.session_state.submitted = False
-            st.experimental_rerun()
+           tab.empty()
+           transformed_inputs = input_transformer(inputs_to_transform)
+           inputs_array = [list(inputs.values()) + transformed_inputs]
+           st.write("Client Name: " + fName)
+           st.write("Loan Amount: " + loan_amount)
+           # print(inputs)
+           prediction  = model.predict(inputs_array)
+           if prediction[0] == 0:
+               st.success("Please accept the above loan request")
+           else:
+               st.error("Please reject the above request as client is more prone to default on the loan")
